@@ -64,7 +64,7 @@ def average_route_distance(flights_df, airports_df, countries_continents_df, con
                     .selectExpr("df_origin.*", "lat as destination_lat", "lon as destination_lon", "alt as destination_alt")
     flights_info = flights_info.withColumn('distance2d', distance_udf(F.array("origin_lat", "origin_lon"), F.array("destination_lat", "destination_lon")))
     flights_info = flights_info.withColumn('distance3d', F.sqrt(col("distance2d")**2 + (col("destination_alt") - col("origin_alt"))**2))
-    flights_info_continent = flights_info.alias("df1").join(countries_continents_df, flights_info.origin_country == countries_continents_df.country, "left")\
+    flights_info_continent = flights_info.alias("df1").join(countries_continents_df, flights_info.origin_country == countries_continents_df.country, "inner")\
                         .selectExpr("df1.*", "continent")
     flights_avg_continent = flights_info_continent.groupby("continent").agg(mean("distance3d"))
     for continent in continents:
@@ -100,7 +100,7 @@ def top_airplanes_company_country(flights_df, airlines_df):
 def airport_most_popular(flights_df, airports_df, countries_continents_df, continents):
     a = flights_df.filter(flights_df.destination_airport_iata != 'N/A')
     a_destination_country = a.join(airports_df, a.destination_airport_iata == airports_df.iata, "inner").selectExpr("destination_airport_iata", "name as airport_name", "country as airport_country")
-    a_destination_continent = a_destination_country.alias("df1").join(countries_continents_df, a_destination_country.airport_country == countries_continents_df.country, "left")\
+    a_destination_continent = a_destination_country.alias("df1").join(countries_continents_df, a_destination_country.airport_country == countries_continents_df.country, "inner")\
                         .selectExpr("df1.*", "continent as airport_continent")
     a_destination_count = a_destination_continent.groupBy(["airport_name", "airport_continent"]).count()
     for continent in continents:
