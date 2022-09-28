@@ -15,13 +15,24 @@ def company_most_flights(df):
 
 # Question 2: By continent, what are the companies with the most regional active flights (airports of Origin & Destination within the same continent) ?
 
-def companies_most_regional_flights2(flights_df, airports_df, countries_continents_df):
-    flights_df_na = flights_df.filter((flights_df.destination_airport_iata != 'N/A') & (flights_df.origin_airport_iata != 'N/A'))
+def companies_most_regional_flights(flights_df, airports_df, countries_continents_df):
+    flights_df_na = flights_df.filter((flights_df.destination_airport_iata != 'N/A') & (flights_df.origin_airport_iata != 'N/A') & (flights_df.airline_icao != 'N/A'))
     flights_origin_country = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
                                         .selectExpr("airline_icao", "origin_airport_iata", "country as origin_country", "destination_airport_iata")
 
     flights_origin_dest_country = flights_origin_country.alias("flights_origin_country").join(airports_df, flights_origin_country.destination_airport_iata == airports_df.iata, "inner") \
                                         .selectExpr("flights_origin_country.*", "country as destination_country")
+
+    flights_origin_continent = flights_origin_dest_country.alias("df1").join(countries_continents_df, flights_origin_dest_country.origin_country == countries_continents_df.country, "left")\
+                        .selectExpr("df1.*", "continent as origin_continent")
+    flights_origin_dest_continent = flights_origin_continent.alias("df2").join(countries_continents_df, flights_origin_continent.destination_country == countries_continents_df.country, "left")\
+                        .selectExpr("df2.*", "continent as destination_continent")
+    flights_same_continent = flights_origin_dest_continent.filter(flights_origin_dest_continent.origin_continent == flights_origin_dest_continent.destination_continent)
+    company_regional_count = flights_same_continent.groupBy(['airline_icao', 'origin_continent']).count()
+    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
+    for continent in continents:
+        company_most_flight = company_regional_count.filter(company_regional_count.origin_continent == continent).sort(desc("count")).collect()[0]
+        print("In " + continent + ", the company: " + company_most_flight['airline_icao'] + " has the most regional active flights with " + str(company_most_flight["count"]) + " regional flights.")
 
 
 

@@ -40,6 +40,9 @@ def main():
     # Question 1
     print(questions.company_most_flights(flights_df) + " is the company which have the most active flights in the world.")
 
+    # Question 2
+    questions.companies_most_regional_flights(flights_df, airports_df, countries_continents_df)
+
     # Question 3
     longest = questions.longest_route_flight(flights_df, airports_df)
     print("World-wide, the flight with the callsign " + longest[0] + " has the longest route from " + longest[1] + " airport to " + longest[2] + " airport.")
