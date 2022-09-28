@@ -3,6 +3,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
 import questions
+import preprocessing
 
 def main():
     fr_api = FlightRadar24API()
@@ -33,6 +34,9 @@ def main():
     airlines_df = spark.createDataFrame(data = airlines, schema = airlines_schema)
     flights_df = spark.createDataFrame(data = flights)
 
+    countries_continents_df = spark.read.csv('country_continent.csv', header=True)
+    countries_continents_df = preprocessing.update_countries_continents(countries_continents_df, spark)
+
     # Question 1
     print(questions.company_most_flights(flights_df) + " is the company which have the most active flights in the world.")
 
@@ -44,7 +48,10 @@ def main():
 
 
     # Question 7.1
-    print(questions.airport_most_popular(flights_df, airports_df) + " is the most popular destination airport")
+    questions.airport_most_popular(flights_df, airports_df, countries_continents_df)
+
+    # Question 7.2
+    questions.airports_best_balance(flights_df)
 
 
 main()

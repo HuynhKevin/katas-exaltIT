@@ -15,17 +15,13 @@ def company_most_flights(df):
 
 # Question 2: By continent, what are the companies with the most regional active flights (airports of Origin & Destination within the same continent) ?
 
-def companies_most_regional_flights(spark, flights_df, airports_df):
-    flights_df.registerTempTable('flights')
-    airports_df.registerTempTable('airports')
-    #flights_origin_country = spark.sql('select airline_icao, origin_airport_iata, country as origin_country, destination_airport_iata from flights left join airports on flights.origin_airport_iata = airports.iata')
-    flights_origin_country = spark.sql('select *, country as origin_country from flights left join airports on flights.origin_airport_iata = airports.iata')
-    flights_origin_country.registerTempTable('flights_origin_country')
-    #flights_origin_dest_country = spark.sql('select airline_icao, origin_airport_iata, origin_country, destination_airport_iata, country as destination_country from flights_origin_country left join airports on flights_origin_country.destination_airport_iata = airports.iata')
-    flights_origin_dest_country = spark.sql('select *, airports.country as destination_country from flights_origin_country left join airports on flights_origin_country.destination_airport_iata = airports.iata')
-    flights_origin_dest_country = flights_origin_dest_country.na.drop(subset=["origin_country", "destination_country"])
-    flights_origin_dest_country.show(2)
-    print(flights_origin_dest_country.count())
+def companies_most_regional_flights2(flights_df, airports_df, countries_continents_df):
+    flights_df_na = flights_df.filter((flights_df.destination_airport_iata != 'N/A') & (flights_df.origin_airport_iata != 'N/A'))
+    flights_origin_country = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
+                                        .selectExpr("airline_icao", "origin_airport_iata", "country as origin_country", "destination_airport_iata")
+
+    flights_origin_dest_country = flights_origin_country.alias("flights_origin_country").join(airports_df, flights_origin_country.destination_airport_iata == airports_df.iata, "inner") \
+                                        .selectExpr("flights_origin_country.*", "country as destination_country")
 
 
 
@@ -60,12 +56,16 @@ def longest_route_flight(flights_df, airports_df):
 
 
 # Question 7.1: By continent, what airport is the most popular destination ?
-def airport_most_popular(flights_df, airports_df):
-    nb_flights_destination = flights_df.filter(flights_df.destination_airport_iata != 'N/A').groupBy('destination_airport_iata').count()
-    nb_flights_destination = nb_flights_destination.join(airports_df, nb_flights_destination.destination_airport_iata == airports_df.iata, "inner").sort(desc("count"))
-    famous_airport = nb_flights_destination.collect()[0]["name"]
-    return famous_airport
-
+def airport_most_popular(flights_df, airports_df, countries_continents_df):
+    a = flights_df.filter(flights_df.destination_airport_iata != 'N/A')
+    a_destination_country = a.join(airports_df, a.destination_airport_iata == airports_df.iata, "inner").selectExpr("destination_airport_iata", "name as airport_name", "country as airport_country")
+    a_destination_continent = a_destination_country.alias("df1").join(countries_continents_df, a_destination_country.airport_country == countries_continents_df.country, "left")\
+                        .selectExpr("df1.*", "continent as airport_continent")
+    a_destination_count = a_destination_continent.groupBy(["airport_name", "airport_continent"]).count()
+    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
+    for continent in continents:
+        popular_destination = a_destination_count.filter(a_destination_count.airport_continent == continent).sort(desc("count")).collect()[0]
+        print("In " + continent + ", the airport: " + popular_destination["airport_name"] + " is the most popular destination with " + str(popular_destination["count"]) + " flights.")
 
 # Question 7.2: What airport has the greatest inbound/outbound flights difference ? (positive or negative)
 def airports_best_balance(flights_df):
@@ -73,9 +73,12 @@ def airports_best_balance(flights_df):
     nb_flights_origin = flights_df.filter(flights_df.origin_airport_iata != 'N/A').groupBy('origin_airport_iata').count().withColumnRenamed("count", "origin_nb_flight")
     difference_flights_airports = nb_flights_destination.join(nb_flights_origin, nb_flights_destination.destination_airport_iata == nb_flights_origin.origin_airport_iata, "inner")
     difference_flights_airports = difference_flights_airports.withColumn("inbound/outbound", difference_flights_airports.destination_nb_flight - difference_flights_airports.origin_nb_flight)
-    best_positive = difference_flights_airports.sort(desc["inbound/outbound"]).collect()[0]["destination_airport_iata"]
-    best_negative = difference_flights_airports.sort(asc["inbound/outbound"]).collect()[0]["destination_airport_iata"]
-    return best_positive, best_negative
+    best_positive = difference_flights_airports.sort(desc("inbound/outbound")).collect()[0]
+    best_negative = difference_flights_airports.sort(asc("inbound/outbound")).collect()[0]
+    print(best_positive["destination_airport_iata"] + " is the airport with the greatest inbound/outbound flights difference positively with " \
+            + str(best_positive["destination_nb_flight"]) + " flights inbound and " + str(best_positive["origin_nb_flight"]) + " flights outbound. ") 
+    print(best_negative["destination_airport_iata"] + " is the airport with the greatest inbound/outbound flights difference negatively with " \
+            + str(best_negative["destination_nb_flight"]) + " flights inbound and " + str(best_negative["origin_nb_flight"]) + " flights outbound. ")
 
 
 # Question 8: By continent, what is the average active flight speed ? (flight localization by airport of origin)
