@@ -1,6 +1,5 @@
 from pyspark.sql.functions import *
 from geopy import distance
-import pyspark.sql.functions as F
 from pyspark.sql.types import *
 
 # Question 1: What is the company with the most active flights in the world ?
@@ -41,7 +40,7 @@ def companies_most_regional_flights(flights_df, airports_df, countries_continent
 
 
 # Question 3: World-wide, Which active flight has the longest route ?
-@F.udf(returnType=FloatType())
+@udf(returnType=FloatType())
 def distance_udf(a, b):
     return distance.distance(a, b).m
 
@@ -51,8 +50,8 @@ def longest_route_flight(flights_df, airports_df):
     flights_df_coord = flights_df_coord_origin.alias("df_coord_origin").join(airports_df, flights_df_coord_origin.destination_airport_iata == airports_df.iata, "inner")\
                     .selectExpr("df_coord_origin.*", "lat as destination_lat", "lon as destination_lon", "alt as destination_alt")
     
-    flights_df_coord = flights_df_coord.withColumn('distance2d', distance_udf(F.array("origin_lat", "origin_lon"), F.array("destination_lat", "destination_lon")))
-    flights_df_coord = flights_df_coord.withColumn('distance3d', F.sqrt(col("distance2d")**2 + (col("destination_alt") - col("origin_alt"))**2))
+    flights_df_coord = flights_df_coord.withColumn('distance2d', distance_udf(array("origin_lat", "origin_lon"), array("destination_lat", "destination_lon")))
+    flights_df_coord = flights_df_coord.withColumn('distance3d', sqrt(col("distance2d")**2 + (col("destination_alt") - col("origin_alt"))**2))
     longest_flight = flights_df_coord.sort(desc('distance3d')).collect()[0]
     print("World-wide, the flight with the callsign " + longest_flight["callsign"] + " has the longest route from " + longest_flight["origin_airport_iata"] + " airport to " + longest_flight["destination_airport_iata"] + " airport.")
 
@@ -64,8 +63,8 @@ def average_route_distance(flights_df, airports_df, countries_continents_df, con
                                         .selectExpr("origin_airport_iata", "country as origin_country", "destination_airport_iata", "lat as origin_lat", "lon as origin_lon", "alt as origin_alt")
     flights_info = flights_origin_info.alias("df_origin").join(airports_df, flights_origin_info.destination_airport_iata == airports_df.iata, "inner")\
                     .selectExpr("df_origin.*", "lat as destination_lat", "lon as destination_lon", "alt as destination_alt")
-    flights_info = flights_info.withColumn('distance2d', distance_udf(F.array("origin_lat", "origin_lon"), F.array("destination_lat", "destination_lon")))
-    flights_info = flights_info.withColumn('distance3d', F.sqrt(col("distance2d")**2 + (col("destination_alt") - col("origin_alt"))**2))
+    flights_info = flights_info.withColumn('distance2d', distance_udf(array("origin_lat", "origin_lon"), array("destination_lat", "destination_lon")))
+    flights_info = flights_info.withColumn('distance3d', sqrt(col("distance2d")**2 + (col("destination_alt") - col("origin_alt"))**2))
     flights_info_continent = flights_info.alias("df1").join(countries_continents_df, flights_info.origin_country == countries_continents_df.country, "inner")\
                         .selectExpr("df1.*", "continent")
     flights_avg_continent = flights_info_continent.groupby("continent").agg(mean("distance3d"))
