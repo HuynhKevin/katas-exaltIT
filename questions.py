@@ -1,4 +1,7 @@
 from pyspark.sql.functions import *
+from geopy import distance
+import pyspark.sql.functions as F
+from pyspark.sql.types import *
 
 # Question 1: What is the company with the most active flights in the world ?
 
@@ -7,6 +10,7 @@ def company_most_flights(df):
     # We filter according that N/A is not considered as a company
     company_most_flights = nb_companies_flights.where(nb_companies_flights.airline_icao != "N/A").collect()[0]["airline_icao"]
     return company_most_flights
+
 
 
 # Question 2: By continent, what are the companies with the most regional active flights (airports of Origin & Destination within the same continent) ?
@@ -23,10 +27,27 @@ def companies_most_regional_flights(spark, flights_df, airports_df):
     flights_origin_dest_country.show(2)
     print(flights_origin_dest_country.count())
 
+
+
 # Question 3: World-wide, Which active flight has the longest route ?
+@F.udf(returnType=FloatType())
+def distance_udf(a, b):
+    return distance.distance(a, b).m
+
+def longest_route_flight(flights_df, airports_df):
+    flights_df_coord_origin = flights_df.join(airports_df, flights_df.origin_airport_iata == airports_df.iata, "inner")\
+                                        .selectExpr("callsign", "origin_airport_iata", "destination_airport_iata", "lat as origin_lat", "lon as origin_lon", "alt as origin_alt")
+    flights_df_coord = flights_df_coord_origin.alias("df_coord_origin").join(airports_df, flights_df_coord_origin.destination_airport_iata == airports_df.iata, "inner")\
+                    .selectExpr("df_coord_origin.*", "lat as destination_lat", "lon as destination_lon", "alt as destination_alt")
+    
+    flights_df_coord = flights_df_coord.withColumn('distance2d', distance_udf(F.array("origin_lat", "origin_lon"), F.array("destination_lat", "destination_lon")))
+    flights_df_coord = flights_df_coord.withColumn('distance3d', F.sqrt(col("distance2d")**2 + (col("destination_alt") - col("origin_alt"))**2))
+    longest_flight = flights_df_coord.sort(desc('distance3d')).collect()[0]
+    return longest_flight["callsign"], longest_flight["origin_airport_iata"], longest_flight["destination_airport_iata"]
 
 
 # Question 4: By continent, what is the average route distance ? (flight localization by airport of origin)
+
 
 
 # Question 5.1: Which leading airplane manufacturer has the most active flights in the world ?

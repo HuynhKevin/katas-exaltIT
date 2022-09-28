@@ -9,6 +9,7 @@ def main():
     airports = fr_api.get_airports()
     airlines = fr_api.get_airlines()
     flights = fr_api.get_flights()
+    zones = fr_api.get_zones()
 
     # Create Spark Session
     spark = (
@@ -35,9 +36,15 @@ def main():
     # Question 1
     print(questions.company_most_flights(flights_df) + " is the company which have the most active flights in the world.")
 
+    # Question 3
+    longest = questions.longest_route_flight(flights_df, airports_df)
+    print("World-wide, the flight with the callsign " + longest[0] + " has the longest route from " + longest[1] + " airport to " + longest[2] + " airport.")
+
+    # Question 4
+
+
     # Question 7.1
     print(questions.airport_most_popular(flights_df, airports_df) + " is the most popular destination airport")
 
-    print(flights_df.count())
 
 main()
