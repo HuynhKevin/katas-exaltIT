@@ -16,7 +16,7 @@ def company_most_flights(df):
 
 # Question 2: By continent, what are the companies with the most regional active flights (airports of Origin & Destination within the same continent) ?
 
-def companies_most_regional_flights(flights_df, airports_df, countries_continents_df):
+def companies_most_regional_flights(flights_df, airports_df, countries_continents_df, continents):
     flights_df_na = flights_df.filter((flights_df.destination_airport_iata != 'N/A') & (flights_df.origin_airport_iata != 'N/A') & (flights_df.airline_icao != 'N/A'))
     flights_origin_country = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
                                         .selectExpr("airline_icao", "origin_airport_iata", "country as origin_country", "destination_airport_iata")
@@ -32,7 +32,6 @@ def companies_most_regional_flights(flights_df, airports_df, countries_continent
     #flights_origin_dest_continent.filter(flights_origin_dest_continent.destination_continent.isNull()).show(50, False)
     flights_same_continent = flights_origin_dest_continent.filter(flights_origin_dest_continent.origin_continent == flights_origin_dest_continent.destination_continent)
     company_regional_count = flights_same_continent.groupBy(['airline_icao', 'origin_continent']).count()
-    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
     for continent in continents:
         company_most_flight = company_regional_count.filter(company_regional_count.origin_continent == continent).sort(desc("count")).collect()[0]
         print("In " + continent + ", the company: " + company_most_flight['airline_icao'] + " has the most regional active flights with " + str(company_most_flight["count"]) + " regional flights.")
@@ -57,7 +56,7 @@ def longest_route_flight(flights_df, airports_df):
 
 
 # Question 4: By continent, what is the average route distance ? (flight localization by airport of origin)
-def average_route_distance(flights_df, airports_df, countries_continents_df):
+def average_route_distance(flights_df, airports_df, countries_continents_df, continents):
     flights_df_na = flights_df.filter(flights_df.origin_airport_iata != 'N/A')
     flights_origin_info = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
                                         .selectExpr("origin_airport_iata", "country as origin_country", "destination_airport_iata", "lat as origin_lat", "lon as origin_lon", "alt as origin_alt")
@@ -68,7 +67,6 @@ def average_route_distance(flights_df, airports_df, countries_continents_df):
     flights_info_continent = flights_info.alias("df1").join(countries_continents_df, flights_info.origin_country == countries_continents_df.country, "left")\
                         .selectExpr("df1.*", "continent")
     flights_avg_continent = flights_info_continent.groupby("continent").agg(mean("distance3d"))
-    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
     for continent in continents:
         average_distance = flights_avg_continent.filter(flights_avg_continent.continent == continent).collect()[0]["avg(distance3d)"]
         print("In " + continent + "(by airport of origin), the average route distance of active flights is : " + str(average_distance) + " m.")
@@ -79,14 +77,13 @@ def average_route_distance(flights_df, airports_df, countries_continents_df):
 
 
 # Question 5.2: By continent, what is the most frequent airplane model ? (airplane localization by airport of origin)
-def most_frequent_airplane(flights_df, airports_df, countries_continents_df):
+def most_frequent_airplane(flights_df, airports_df, countries_continents_df, continents):
     flights_df_na = flights_df.filter((flights_df.origin_airport_iata != 'N/A') & (flights_df.aircraft_code != 'N/A'))
     flights_origin_info = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
                                         .selectExpr("aircraft_code", "origin_airport_iata", "country as origin_country")
     flights_info_continent = flights_origin_info.alias("df1").join(countries_continents_df, flights_origin_info.origin_country == countries_continents_df.country, "inner")\
                         .selectExpr("df1.*", "continent")
     flights_model_continent = flights_info_continent.groupby(["aircraft_code", "continent"]).count()
-    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
     for continent in continents:
         model = flights_model_continent.filter(flights_model_continent.continent == continent).sort(desc("count")).collect()[0]["aircraft_code"]
         print("In " + continent + " (by airport of origin), " + model + " is the most frequent airplane model.")
@@ -100,13 +97,12 @@ def top_airplanes_company_country(flights_df, airlines_df):
 
 
 # Question 7.1: By continent, what airport is the most popular destination ?
-def airport_most_popular(flights_df, airports_df, countries_continents_df):
+def airport_most_popular(flights_df, airports_df, countries_continents_df, continents):
     a = flights_df.filter(flights_df.destination_airport_iata != 'N/A')
     a_destination_country = a.join(airports_df, a.destination_airport_iata == airports_df.iata, "inner").selectExpr("destination_airport_iata", "name as airport_name", "country as airport_country")
     a_destination_continent = a_destination_country.alias("df1").join(countries_continents_df, a_destination_country.airport_country == countries_continents_df.country, "left")\
                         .selectExpr("df1.*", "continent as airport_continent")
     a_destination_count = a_destination_continent.groupBy(["airport_name", "airport_continent"]).count()
-    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
     for continent in continents:
         popular_destination = a_destination_count.filter(a_destination_count.airport_continent == continent).sort(desc("count")).collect()[0]
         print("In " + continent + ", the airport: " + popular_destination["airport_name"] + " is the most popular destination with " + str(popular_destination["count"]) + " flights.")
@@ -126,14 +122,13 @@ def airports_best_balance(flights_df):
 
 
 # Question 8: By continent, what is the average active flight speed ? (flight localization by airport of origin)
-def average_flight_speed(flights_df, airports_df, countries_continents_df):
+def average_flight_speed(flights_df, airports_df, countries_continents_df, continents):
     flights_df_na = flights_df.filter(flights_df.origin_airport_iata != 'N/A')
     flights_origin_info = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
                                         .selectExpr("origin_airport_iata", "ground_speed", "country as origin_country")
     flights_info_continent = flights_origin_info.alias("df1").join(countries_continents_df, flights_origin_info.origin_country == countries_continents_df.country, "inner")\
                         .selectExpr("df1.*", "continent")
     flights_avg_speed_continent = flights_info_continent.groupby("continent").agg(mean("ground_speed"))
-    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
     for continent in continents:
         average_speed = flights_avg_speed_continent.filter(flights_avg_speed_continent.continent == continent).collect()[0]["avg(ground_speed)"]
         print("In " + continent + "(by airport of origin), the average flight speed of active flights is : " + str(average_speed) + " km/h")

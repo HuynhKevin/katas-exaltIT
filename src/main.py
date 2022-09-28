@@ -37,6 +37,8 @@ def main():
     countries_continents_df = spark.read.csv('country_continent.csv', header=True)
     countries_continents_df = preprocessing.update_countries_continents(countries_continents_df, spark)
 
+    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
+
     # Question 1
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 1:")
@@ -45,7 +47,7 @@ def main():
     # Question 2
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 2:")
-    questions.companies_most_regional_flights(flights_df, airports_df, countries_continents_df)
+    questions.companies_most_regional_flights(flights_df, airports_df, countries_continents_df, continents)
 
     # Question 3
     print("----------------------------------------------------------------------------------------------------------------")
@@ -55,17 +57,17 @@ def main():
     # Question 4
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 4:")
-    questions.average_route_distance(flights_df, airports_df, countries_continents_df)
+    questions.average_route_distance(flights_df, airports_df, countries_continents_df, continents)
 
     # Question 5.2
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 5.2:")
-    questions.most_frequent_airplane(flights_df, airports_df, countries_continents_df)
+    questions.most_frequent_airplane(flights_df, airports_df, countries_continents_df, continents)
 
     # Question 7.1
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 7.1:")
-    questions.airport_most_popular(flights_df, airports_df, countries_continents_df)
+    questions.airport_most_popular(flights_df, airports_df, countries_continents_df, continents)
 
     # Question 7.2
     print("----------------------------------------------------------------------------------------------------------------")
@@ -75,7 +77,7 @@ def main():
     # Question 8
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 8:")
-    questions.average_flight_speed(flights_df, airports_df, countries_continents_df)
+    questions.average_flight_speed(flights_df, airports_df, countries_continents_df, continents)
 
 
 main()
