@@ -53,7 +53,7 @@ def longest_route_flight(flights_df, airports_df):
     flights_df_coord = flights_df_coord.withColumn('distance2d', distance_udf(F.array("origin_lat", "origin_lon"), F.array("destination_lat", "destination_lon")))
     flights_df_coord = flights_df_coord.withColumn('distance3d', F.sqrt(col("distance2d")**2 + (col("destination_alt") - col("origin_alt"))**2))
     longest_flight = flights_df_coord.sort(desc('distance3d')).collect()[0]
-    return longest_flight["callsign"], longest_flight["origin_airport_iata"], longest_flight["destination_airport_iata"]
+    print("World-wide, the flight with the callsign " + longest_flight["callsign"] + " has the longest route from " + longest_flight["origin_airport_iata"] + " airport to " + longest_flight["destination_airport_iata"] + " airport.")
 
 
 # Question 4: By continent, what is the average route distance ? (flight localization by airport of origin)

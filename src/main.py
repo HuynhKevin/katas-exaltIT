@@ -2,8 +2,8 @@ from FlightRadar24.api import FlightRadar24API
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
-import questions
-import preprocessing
+import questions as questions
+import preprocessing as preprocessing
 
 def main():
     fr_api = FlightRadar24API()
@@ -38,6 +38,7 @@ def main():
     countries_continents_df = preprocessing.update_countries_continents(countries_continents_df, spark)
 
     # Question 1
+    print("----------------------------------------------------------------------------------------------------------------")
     print("Question 1:")
     print(questions.company_most_flights(flights_df) + " is the company which have the most active flights in the world.")
 
@@ -49,8 +50,7 @@ def main():
     # Question 3
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 3:")
-    longest = questions.longest_route_flight(flights_df, airports_df)
-    print("World-wide, the flight with the callsign " + longest[0] + " has the longest route from " + longest[1] + " airport to " + longest[2] + " airport.")
+    questions.longest_route_flight(flights_df, airports_df)
 
     # Question 4
     print("----------------------------------------------------------------------------------------------------------------")
