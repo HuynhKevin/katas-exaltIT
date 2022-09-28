@@ -3,7 +3,6 @@ from geopy import distance
 from pyspark.sql.types import *
 
 # Question 1: What is the company with the most active flights in the world ?
-
 def company_most_flights(df):
     # We filter according that N/A is not considered as a company
     nb_companies_flights = df.filter(df.airline_icao != 'N/A')
@@ -14,7 +13,6 @@ def company_most_flights(df):
 
 
 # Question 2: By continent, what are the companies with the most regional active flights (airports of Origin & Destination within the same continent) ?
-
 def companies_most_regional_flights(flights_df, airports_df, countries_continents_df, continents):
     flights_df_na = flights_df.filter((flights_df.destination_airport_iata != 'N/A') & (flights_df.origin_airport_iata != 'N/A') & (flights_df.airline_icao != 'N/A'))
     flights_origin_country = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
@@ -101,11 +99,17 @@ def most_frequent_airplane(flights_df, airports_df, countries_continents_df, con
 
 
 # Question 6: By company registration country, what are the tops 3 airplanes model flying ?
-def top_airplanes_company_country(flights_df, airlines_df):
-    flights_df_na = flights_df.filter((flights_df.airline_icao != 'N/A') & (flights_df.aircraft_code != 'N/A'))
-    flights_company_country = flights_df_na.join(airlines_df, flights_df_na.airline_icao == airlines_df.ICAO, "inner") \
-                                        .selectExpr("aircraft_code", "airline_icao", "country as origin_country")
+def top_airplanes_company_country(flights_df, airlines_df, airlines_country_df):
+    airlines_country_filter = airlines_country_df.selectExpr('ICAO as airline_icao', 'Country').filter((airlines_country_df.ICAO != 'N/A') & (airlines_country_df.ICAO.isNotNull()))
+    airlines_country = airlines_df.join(airlines_country_filter, airlines_df.ICAO == airlines_country_filter.airline_icao, "inner").selectExpr('ICAO', 'Country')
 
+    flights_df_na = flights_df.filter((flights_df.airline_icao != 'N/A') & (flights_df.aircraft_code != 'N/A'))
+    flights_company_country = flights_df_na.join(airlines_country, flights_df_na.airline_icao == airlines_df.ICAO, "inner") \
+                                        .selectExpr("aircraft_code", "airline_icao", "Country")
+    flights_model_country_count = flights_company_country.groupBy(['aircraft_code', 'Country']).count().sort(desc("count"))
+    print("By company registration country, the tops 3 airplanes are: " + flights_model_country_count.collect()[0]["aircraft_code"] \
+                                                                        + ", " + flights_model_country_count.collect()[1]["aircraft_code"] \
+                                                                        + " and " + flights_model_country_count.collect()[2]["aircraft_code"])
 
 # Question 7.1: By continent, what airport is the most popular destination ?
 def airport_most_popular(flights_df, airports_df, countries_continents_df, continents):

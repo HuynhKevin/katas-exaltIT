@@ -72,6 +72,8 @@ def main():
     # Question 6
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 6:")
+    airlines_country_df = spark.read.csv('airlines.csv', header=True)
+    questions.top_airplanes_company_country(flights_df, airlines_df, airlines_country_df)
 
     # Question 7.1
     print("----------------------------------------------------------------------------------------------------------------")

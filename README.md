@@ -78,6 +78,11 @@ After that, I just needed to group data by continent and aircraft code (that is 
 
 -----
 ### Question 6: By company registration country, what are the tops 3 airplanes model flying ?
+For this question, I also used an external dataset https://www.kaggle.com/datasets/open-flights/airline-database?resource=download that referenced the country for each airline company. 
+
+Thanks to that, I can joined this new external dataframe with the dataframe of FlightRadar airlines thanks to ICAO code. 
+And then link this table with flights dataframe according the airline_icao. 
+Finally just by grouping data by country and aircraft code (aircraft model) I can collect the top 3 airplanes model flying by company registration country. 
 
 
 -----
