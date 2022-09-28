@@ -62,7 +62,10 @@ Finally I groupby datas according to the continent of origin airport and make an
 
 -----
 ### Question 5.1: Which leading airplane manufacturer has the most active flights in the world ?
+For this question, I haven't find the best manner to implement it.
 
+I have found a solution that consist from the list of flights: through fr_api.get_flights() loop on each flight and get details of it through fr_api.get_flight_details(flight.id) and then add the content aircraft_model to each object flight of the initial list. So that when I transform the list into spark dataframe I have the information about the manufacturer of each flights. 
+But this method is quite long to execute so I think there is a better manner to do it. 
 
 -----
 ### Question 5.2: By continent, what is the most frequent airplane model ? (airplane localization by airport of origin)

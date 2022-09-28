@@ -59,10 +59,18 @@ def main():
     print("Question 4:")
     questions.average_route_distance(flights_df, airports_df, countries_continents_df, continents)
 
+    # Question 5.1
+    print("----------------------------------------------------------------------------------------------------------------")
+    print("Question 5.1:")
+
     # Question 5.2
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 5.2:")
     questions.most_frequent_airplane(flights_df, airports_df, countries_continents_df, continents)
+
+    # Question 6
+    print("----------------------------------------------------------------------------------------------------------------")
+    print("Question 6:")
 
     # Question 7.1
     print("----------------------------------------------------------------------------------------------------------------")
