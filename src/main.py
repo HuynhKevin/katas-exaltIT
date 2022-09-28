@@ -72,5 +72,10 @@ def main():
     print("Question 7.2:")
     questions.airports_best_balance(flights_df)
 
+    # Question 8
+    print("----------------------------------------------------------------------------------------------------------------")
+    print("Question 8:")
+    questions.average_flight_speed(flights_df, airports_df, countries_continents_df)
+
 
 main()
