@@ -71,7 +71,7 @@ def average_route_distance(flights_df, airports_df, countries_continents_df):
     continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
     for continent in continents:
         average_distance = flights_avg_continent.filter(flights_avg_continent.continent == continent).collect()[0]["avg(distance3d)"]
-        print("In " + continent + " referenced by airport of origin, the average route distance of active flights is : " + str(average_distance) + " m.")
+        print("In " + continent + "(by airport of origin), the average route distance of active flights is : " + str(average_distance) + " m.")
 
     
 
@@ -79,6 +79,17 @@ def average_route_distance(flights_df, airports_df, countries_continents_df):
 
 
 # Question 5.2: By continent, what is the most frequent airplane model ? (airplane localization by airport of origin)
+def most_frequent_airplane(flights_df, airports_df, countries_continents_df):
+    flights_df_na = flights_df.filter(flights_df.origin_airport_iata != 'N/A')
+    flights_origin_info = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
+                                        .selectExpr("aircraft_code", "origin_airport_iata", "country as origin_country")
+    flights_info_continent = flights_origin_info.alias("df1").join(countries_continents_df, flights_origin_info.origin_country == countries_continents_df.country, "inner")\
+                        .selectExpr("df1.*", "continent")
+    flights_model_continent = flights_info_continent.groupby(["aircraft_code", "continent"]).count()
+    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
+    for continent in continents:
+        model = flights_model_continent.filter(flights_model_continent.continent == continent).sort(desc("count")).collect()[0]["aircraft_code"]
+        print("In " + continent + " (by airport of origin), " + model + " is the most frequent airplane model.")
 
 
 # Question 6: By company registration country, what are the tops 3 airplanes model flying ?

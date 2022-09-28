@@ -46,7 +46,21 @@ Finally I groupby datas according to the continent of origin airport and make an
 
 -----
 ## Question 5.2: By continent, what is the most frequent airplane model ? (airplane localization by airport of origin)
+For this question, like the other questions I joined dataframes to find the country and the continent of the airport of origin (it is the one who determine the continent).
 
+After that, I just needed to group data by continent and aircraft code (that is the model of the airplane) so that I can collect for each continent the most frequent airplane model. 
 
 -----
 ## Question 6: By company registration country, what are the tops 3 airplanes model flying ?
+
+
+-----
+# Question 7.1: By continent, what airport is the most popular destination ?
+
+
+-----
+# Question 7.2: What airport has the greatest inbound/outbound flights difference ? (positive or negative)
+
+
+-----
+# Question 8: By continent, what is the average active flight speed ? (flight localization by airport of origin)
