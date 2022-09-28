@@ -8,9 +8,12 @@ def update_countries_continents(countries_continents_df, spark):
                                 .when(col("country") == "CZ", "Czechia")
                                 .when(col("country") == "Bosnia and Herzegovina", "Bosnia And Herzegovina")
                                 .when(col("country") == "Congo, Democratic Republic of", "Democratic Republic Of The Congo")
+                                .when(col("country") == "Antigua and Barbuda", "Antigua And Barbuda")
+                                .when(col("country") == "Trinidad and Tobago", "Trinidad And Tobago")
                                 .otherwise(col("country")))
                                 
-    vals = [("Asia", "Hong Kong"), ("Asia", "Taiwan"), ("North America", "Puerto Rico")]
+    vals = [("Asia", "Hong Kong"), ("Asia", "Taiwan"), ("North America", "Puerto Rico"), ("Oceania", "Guam"), \
+            ("North America", "Martinique"), ("Oceania", "New Caledonia"), ("South America", "Curacao"), ("Oceania", "Northern Mariana Islands")]
     newRows = spark.createDataFrame(vals, ["continent", "country"])
 
     return countries_continents_df.union(newRows)
