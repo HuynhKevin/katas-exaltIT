@@ -67,6 +67,9 @@ For this question, I haven't find the best manner to implement it.
 I have found a solution that consist from the list of flights: through fr_api.get_flights() loop on each flight and get details of it through fr_api.get_flight_details(flight.id) and then add the content aircraft_model to each object flight of the initial list. So that when I transform the list into spark dataframe I have the information about the manufacturer of each flights. 
 But this method is quite long to execute so I think there is a better manner to do it. 
 
+To solve this problem, I have considered only 2 manufacturer that are Boeing and Airbus. I have create a new column in the dataframe flights: when the aircraft code started with A I considered that is an Airbus and Boeing for B. 
+Then I just count the number of flights groupby the manufacturer. 
+
 -----
 ### Question 5.2: By continent, what is the most frequent airplane model ? (airplane localization by airport of origin)
 For this question, like the other questions I joined dataframes to find the country and the continent of the airport of origin (it is the one who determine the continent).

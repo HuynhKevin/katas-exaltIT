@@ -33,9 +33,11 @@ def companies_most_regional_flights(flights_df, airports_df, countries_continent
     flights_same_continent = flights_origin_dest_continent.filter(flights_origin_dest_continent.origin_continent == flights_origin_dest_continent.destination_continent)
     company_regional_count = flights_same_continent.groupBy(['airline_icao', 'origin_continent']).count()
     for continent in continents:
-        company_most_flight = company_regional_count.filter(company_regional_count.origin_continent == continent).sort(desc("count")).collect()[0]
-        print("In " + continent + ", the company: " + company_most_flight['airline_icao'] + " has the most regional active flights with " + str(company_most_flight["count"]) + " regional flights.")
-
+        if (company_regional_count.filter(company_regional_count.origin_continent == continent).count() > 0): 
+            company_most_flight = company_regional_count.filter(company_regional_count.origin_continent == continent).sort(desc("count")).collect()[0]
+            print("In " + continent + ", the company: " + company_most_flight['airline_icao'] + " has the most regional active flights with " + str(company_most_flight["count"]) + " regional flights.")
+        else:
+            print("There aren't regional active flights in " + continent)
 
 
 # Question 3: World-wide, Which active flight has the longest route ?
@@ -74,6 +76,16 @@ def average_route_distance(flights_df, airports_df, countries_continents_df, con
     
 
 # Question 5.1: Which leading airplane manufacturer has the most active flights in the world ?
+def leading_manufacturer(flights_df):
+    flights_df_na = flights_df.filter(flights_df.aircraft_code != 'N/A')
+    flights_manufacturer = flights_df_na.withColumn('manufacturer',\
+                                 when(col("aircraft_code").startswith('A'), "Airbus")
+                                 .when(col("aircraft_code").startswith('B'), "Boeing")
+                                 .otherwise("N/A"))
+    flights_manufacturer_na = flights_manufacturer.filter(flights_manufacturer.manufacturer != 'N/A')
+    flights_manufacturer_count = flights_manufacturer_na.groupBy("manufacturer").count()
+    lead_manufacturer = flights_manufacturer_count.sort(desc("count")).collect()[0]
+    print("The manufacturer " + lead_manufacturer["manufacturer"] + " has the most active flights in the world with " + str(lead_manufacturer["count"]) + " flights.")
 
 
 # Question 5.2: By continent, what is the most frequent airplane model ? (airplane localization by airport of origin)
