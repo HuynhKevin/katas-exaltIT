@@ -9,7 +9,7 @@ Kevin Huynh     - kevin.huynh@epita.fr
 Install dependencies
 
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Execute the code
