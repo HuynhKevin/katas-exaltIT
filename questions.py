@@ -6,9 +6,10 @@ from pyspark.sql.types import *
 # Question 1: What is the company with the most active flights in the world ?
 
 def company_most_flights(df):
-    nb_companies_flights = df.groupBy('airline_icao').count().sort(desc("count"))
     # We filter according that N/A is not considered as a company
-    company_most_flights = nb_companies_flights.where(nb_companies_flights.airline_icao != "N/A").collect()[0]["airline_icao"]
+    nb_companies_flights = df.filter(df.airline_icao != 'N/A')
+    nb_companies_flights = nb_companies_flights.groupBy('airline_icao').count().sort(desc("count"))
+    company_most_flights = nb_companies_flights.collect()[0]["airline_icao"]
     return company_most_flights
 
 
@@ -27,6 +28,8 @@ def companies_most_regional_flights(flights_df, airports_df, countries_continent
                         .selectExpr("df1.*", "continent as origin_continent")
     flights_origin_dest_continent = flights_origin_continent.alias("df2").join(countries_continents_df, flights_origin_continent.destination_country == countries_continents_df.country, "left")\
                         .selectExpr("df2.*", "continent as destination_continent")
+    #flights_origin_dest_continent.filter(flights_origin_dest_continent.origin_continent.isNull()).show(50, False)
+    #flights_origin_dest_continent.filter(flights_origin_dest_continent.destination_continent.isNull()).show(50, False)
     flights_same_continent = flights_origin_dest_continent.filter(flights_origin_dest_continent.origin_continent == flights_origin_dest_continent.destination_continent)
     company_regional_count = flights_same_continent.groupBy(['airline_icao', 'origin_continent']).count()
     continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
@@ -54,8 +57,23 @@ def longest_route_flight(flights_df, airports_df):
 
 
 # Question 4: By continent, what is the average route distance ? (flight localization by airport of origin)
+def average_route_distance(flights_df, airports_df, countries_continents_df):
+    flights_df_na = flights_df.filter(flights_df.origin_airport_iata != 'N/A')
+    flights_origin_info = flights_df_na.join(airports_df, flights_df_na.origin_airport_iata == airports_df.iata, "inner") \
+                                        .selectExpr("origin_airport_iata", "country as origin_country", "destination_airport_iata", "lat as origin_lat", "lon as origin_lon", "alt as origin_alt")
+    flights_info = flights_origin_info.alias("df_origin").join(airports_df, flights_origin_info.destination_airport_iata == airports_df.iata, "inner")\
+                    .selectExpr("df_origin.*", "lat as destination_lat", "lon as destination_lon", "alt as destination_alt")
+    flights_info = flights_info.withColumn('distance2d', distance_udf(F.array("origin_lat", "origin_lon"), F.array("destination_lat", "destination_lon")))
+    flights_info = flights_info.withColumn('distance3d', F.sqrt(col("distance2d")**2 + (col("destination_alt") - col("origin_alt"))**2))
+    flights_info_continent = flights_info.alias("df1").join(countries_continents_df, flights_info.origin_country == countries_continents_df.country, "left")\
+                        .selectExpr("df1.*", "continent")
+    flights_avg_continent = flights_info_continent.groupby("continent").agg(mean("distance3d"))
+    continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
+    for continent in continents:
+        average_distance = flights_avg_continent.filter(flights_avg_continent.continent == continent).collect()[0]["avg(distance3d)"]
+        print("In " + continent + " referenced by airport of origin, the average route distance of active flights is : " + str(average_distance) + " m.")
 
-
+    
 
 # Question 5.1: Which leading airplane manufacturer has the most active flights in the world ?
 

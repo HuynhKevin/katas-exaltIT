@@ -38,22 +38,33 @@ def main():
     countries_continents_df = preprocessing.update_countries_continents(countries_continents_df, spark)
 
     # Question 1
+    print("Question 1:")
     print(questions.company_most_flights(flights_df) + " is the company which have the most active flights in the world.")
 
     # Question 2
+    print("----------------------------------------------------------------------------------------------------------------")
+    print("Question 2:")
     questions.companies_most_regional_flights(flights_df, airports_df, countries_continents_df)
 
     # Question 3
+    print("----------------------------------------------------------------------------------------------------------------")
+    print("Question 3:")
     longest = questions.longest_route_flight(flights_df, airports_df)
     print("World-wide, the flight with the callsign " + longest[0] + " has the longest route from " + longest[1] + " airport to " + longest[2] + " airport.")
 
     # Question 4
-
+    print("----------------------------------------------------------------------------------------------------------------")
+    print("Question 4:")
+    questions.average_route_distance(flights_df, airports_df, countries_continents_df)
 
     # Question 7.1
+    print("----------------------------------------------------------------------------------------------------------------")
+    print("Question 7.1:")
     questions.airport_most_popular(flights_df, airports_df, countries_continents_df)
 
     # Question 7.2
+    print("----------------------------------------------------------------------------------------------------------------")
+    print("Question 7.2:")
     questions.airports_best_balance(flights_df)
 
 
