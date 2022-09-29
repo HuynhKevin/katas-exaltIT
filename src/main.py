@@ -34,7 +34,7 @@ def main():
     airlines_df = spark.createDataFrame(data = airlines, schema = airlines_schema)
     flights_df = spark.createDataFrame(data = flights)
 
-    countries_continents_df = spark.read.csv('country_continent.csv', header=True)
+    countries_continents_df = spark.read.csv('data/country_continent.csv', header=True)
     countries_continents_df = preprocessing.update_countries_continents(countries_continents_df, spark)
 
     continents = ['Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania']
@@ -42,12 +42,12 @@ def main():
     # Question 1
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 1:")
-    print(questions.company_most_flights(flights_df) + " is the company which have the most active flights in the world.")
+    questions.company_most_flights(flights_df, airlines_df)
 
     # Question 2
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 2:")
-    questions.companies_most_regional_flights(flights_df, airports_df, countries_continents_df, continents)
+    questions.companies_most_regional_flights(flights_df, airports_df, countries_continents_df, continents, airlines_df)
 
     # Question 3
     print("----------------------------------------------------------------------------------------------------------------")
@@ -72,7 +72,7 @@ def main():
     # Question 6
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 6:")
-    airlines_country_df = spark.read.csv('airlines.csv', header=True)
+    airlines_country_df = spark.read.csv('data/airlines.csv', header=True)
     questions.top_airplanes_company_country(flights_df, airlines_df, airlines_country_df)
 
     # Question 7.1
@@ -83,7 +83,7 @@ def main():
     # Question 7.2
     print("----------------------------------------------------------------------------------------------------------------")
     print("Question 7.2:")
-    questions.airports_best_balance(flights_df)
+    questions.airports_best_balance(flights_df, airports_df)
 
     # Question 8
     print("----------------------------------------------------------------------------------------------------------------")

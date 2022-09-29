@@ -18,7 +18,7 @@ def update_countries_continents(countries_continents_df, spark):
             ("North America", "Martinique"), ("Oceania", "New Caledonia"), ("South America", "Curacao"), ("Oceania", "Northern Mariana Islands"), \
             ("Africa", "Reunion"), ("Africa", "Mayotte"), ("North America", "Guadeloupe"), ("Oceania", "French Polynesia"), \
             ("South America", "Aruba"), ("North America", "Turks And Caicos Islands"), ("South America", "French Guiana"), \
-            ("North America", "Saint Vincent And The Grenadines"), ("North America", "Bermuda")]
+            ("North America", "Saint Vincent And The Grenadines"), ("North America", "Bermuda"), ("Asia", "Macao"), ("North America", "Greenland")]
     newRows = spark.createDataFrame(vals, ["continent", "country"])
 
     return countries_continents_df.union(newRows)
