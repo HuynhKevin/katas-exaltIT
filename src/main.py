@@ -10,7 +10,6 @@ def main():
     airports = fr_api.get_airports()
     airlines = fr_api.get_airlines()
     flights = fr_api.get_flights()
-    zones = fr_api.get_zones()
 
     # Create Spark Session
     spark = (
