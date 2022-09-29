@@ -91,4 +91,5 @@ def main():
     questions.average_flight_speed(flights_df, airports_df, countries_continents_df, continents)
 
 
-main()
+if __name__ == "__main__":
+    main()
